@@ -28,7 +28,7 @@ jobs:
 
       - uses: actions/setup-go@v5
         with:
-          go-version: 1.22
+          go-version: '1.23'
           cache-dependency-path: ${{ github.workspace }}/alist-lib/alist/go.sum
 
       - uses: actions/setup-java@v4
@@ -39,7 +39,7 @@ jobs:
       - uses: nttld/setup-ndk@v1
         id: setup-ndk
         with:
-          ndk-version: r25c
+          ndk-version: r26b
 
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v3
@@ -67,16 +67,22 @@ jobs:
           echo ALIAS_PASSWORD='${{ secrets.ALIAS_PASSWORD }}' >> local.properties
           echo KEY_PASSWORD='${{ secrets.KEY_PASSWORD }}' >> local.properties
           echo KEY_PATH='./key.jks' >> local.properties
-          # 从Secrets读取无换行符Base64解码, 然后保存到到app/key.jks
           echo ${{ secrets.KEY_STORE }} | base64 --decode > $GITHUB_WORKSPACE/android/app/key.jks
 
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.16.7'
-      - run: flutter build apk --split-per-abi --release
+
+      - name: Build APK (release signed)
+        if: env.ALIAS_NAME != ''
+        run: flutter build apk --split-per-abi --release
+
+      - name: Build APK (debug unsigned)
+        if: env.ALIAS_NAME == ''
+        run: flutter build apk --split-per-abi --debug
 
       - name: Upload missing_rules.txt
-        if: failure() && steps.gradle.outcome != 'success'
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: "missing_rules"
@@ -84,7 +90,12 @@ jobs:
 
       - name: Init APP Version Name
         run: |
-          echo "ver_name=$(grep -m 1 'versionName' ${{ env.output }}/output-metadata.json | cut -d\" -f4)" >> $GITHUB_ENV
+          APK_OUTPUT_DIR="${{ env.output }}"
+          if [ ! -d "$APK_OUTPUT_DIR" ]; then
+            APK_OUTPUT_DIR="${{ github.workspace }}/build/app/outputs/apk/debug"
+          fi
+          echo "apk_dir=$APK_OUTPUT_DIR" >> $GITHUB_ENV
+          echo "ver_name=$(grep -m 1 'versionName' $APK_OUTPUT_DIR/output-metadata.json | cut -d\" -f4)" >> $GITHUB_ENV
           
       - uses: softprops/action-gh-release@v1
         with:
@@ -93,6 +104,6 @@ jobs:
           body_path: ${{ github.workspace }}/CHANGELOG.md
           draft: false
           prerelease: false
-          files: ${{ env.output }}/*.apk
+          files: ${{ env.apk_dir }}/*.apk
         env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
