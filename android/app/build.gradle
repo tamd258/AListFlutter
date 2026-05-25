@@ -31,10 +31,12 @@ android {
 
     signingConfigs {
         release {
-            storeFile file(pro["KEY_PATH"])
-            storePassword pro["KEY_PASSWORD"]
-            keyAlias pro["ALIAS_NAME"]
-            keyPassword pro["ALIAS_PASSWORD"]
+            if (pro.containsKey("KEY_PATH")) {
+                storeFile file(pro["KEY_PATH"])
+                storePassword pro["KEY_PASSWORD"]
+                keyAlias pro["ALIAS_NAME"]
+                keyPassword pro["ALIAS_PASSWORD"]
+            }
         }
     }
 
