@@ -66,16 +66,17 @@ jobs:
             echo "HAS_KEYSTORE=false" >> $GITHUB_ENV
           fi
 
-      - name: Init Signature
-        if: env.HAS_KEYSTORE == 'true'
+      - name: Init local.properties
         run: |
-          touch local.properties
-          cd android
-          echo ALIAS_NAME='${{ secrets.ALIAS_NAME }}' >> local.properties
-          echo ALIAS_PASSWORD='${{ secrets.ALIAS_PASSWORD }}' >> local.properties
-          echo KEY_PASSWORD='${{ secrets.KEY_PASSWORD }}' >> local.properties
-          echo KEY_PATH='./key.jks' >> local.properties
-          echo ${{ secrets.KEY_STORE }} | base64 --decode > $GITHUB_WORKSPACE/android/app/key.jks
+          touch android/local.properties
+          if [ -n "${{ secrets.KEY_STORE }}" ]; then
+            cd android
+            echo "ALIAS_NAME=${{ secrets.ALIAS_NAME }}" >> local.properties
+            echo "ALIAS_PASSWORD=${{ secrets.ALIAS_PASSWORD }}" >> local.properties
+            echo "KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}" >> local.properties
+            echo "KEY_PATH=./key.jks" >> local.properties
+            echo "${{ secrets.KEY_STORE }}" | base64 --decode > $GITHUB_WORKSPACE/android/app/key.jks
+          fi
 
       - uses: subosito/flutter-action@v2
         with:
