@@ -1,13 +1,13 @@
 #!/bin/bash
 set -e
 
-GIT_REPO="https://github.com/tamd258/alist.git"
-TAG_NAME=$(git -c 'versionsort.suffix=-' ls-remote --exit-code --refs --sort='version:refname' --tags $GIT_REPO | tail --lines=1 | cut --delimiter='/' --fields=3)
+GIT_REPO="https://github.com/tamd258/alistx.git"
+TAG_NAME=$(git -c 'versionsort.suffix=-' ls-remote --refs --sort='version:refname' --tags $GIT_REPO | tail --lines=1 | cut --delimiter='/' --fields=3 || true)
 
 echo "AList - ${TAG_NAME}"
 rm -rf ./src
 unset GIT_WORK_TREE
-git clone https://github.com/tamd258/alist.git ./src
+git clone https://github.com/tamd258/alistx.git ./src
 rm -rf ./src/.git
 
 mv -f ./src/* ../
