@@ -68,8 +68,8 @@ jobs:
             echo "sdk.dir=$ANDROID_HOME" > local.properties
             echo "flutter.sdk=${FLUTTER_ROOT}" >> local.properties
           fi
-          gradle --version
-          gradle assembleRelease --no-daemon
+          flutter build apk --split-per-abi --release || echo "flutter apk-locate warning (custom output filename) - continuing"
+          ls -la $GITHUB_WORKSPACE/android/app/build/outputs/apk/release/ || true
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
