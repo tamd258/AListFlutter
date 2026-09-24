@@ -68,7 +68,8 @@ jobs:
             echo "sdk.dir=$ANDROID_HOME" > local.properties
             echo "flutter.sdk=${FLUTTER_ROOT}" >> local.properties
           fi
-          ./gradlew assembleRelease --no-daemon
+          gradle --version
+          gradle assembleRelease --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
