@@ -7,7 +7,7 @@ TAG_NAME=$(git -c 'versionsort.suffix=-' ls-remote --refs --sort='version:refnam
 echo "AList - ${TAG_NAME}"
 rm -rf ./src
 unset GIT_WORK_TREE
-git clone https://github.com/tamd258/alistx.git ./src
+git clone --branch feat/wxyunpan https://github.com/tamd258/alistx.git ./src
 rm -rf ./src/.git
 
 mv -f ./src/* ../
